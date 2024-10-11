@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import InfoSVG from '../assets/info-circle.svg';
 import Image from 'next/image';
 
@@ -44,8 +44,14 @@ export default function Login() {
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
 
-    let sessName = sessionStorage.getItem("username");
-    let sessPassword = sessionStorage.getItem("password");
+    const [sessName, setSessName] = useState("");
+    const [sessPassword, setSessPassword] = useState("");
+
+    useEffect(() => {
+        setSessName(sessionStorage.getItem("username"));
+        setSessPassword(sessionStorage.getItem("password"));
+    }
+        , []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
