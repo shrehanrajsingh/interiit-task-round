@@ -8,6 +8,7 @@ import FolderSVG from "./assets/folder.svg";
 import FolderOpenSVG from "./assets/folder-open.svg";
 import FileSVG from "./assets/file.svg";
 import PlaceholderImage from "./assets/placeholder.jpg";
+import SearchSVG from "./assets/search.svg";
 
 import Image from "next/image";
 
@@ -206,11 +207,97 @@ const Product = (props) => {
   );
 };
 
+const SearchButton = () => {
+  const [searchModal, setSearchModal] = useState(false);
+
+  let searchText = "";
+  const [searchResults, setSearchResults] = useState([]);
+
+  const search = () => {
+    let results = [];
+
+    for (let item of Items) {
+      if (item.name.toLowerCase().includes(searchText.toLowerCase())) {
+        results.push(item);
+      }
+    }
+
+    setSearchResults(results);
+  }
+
+  return (
+    <>
+      <div className="search-bar" onClick={e => {
+        e.preventDefault();
+
+        let modal = e.currentTarget.parentElement.querySelector('.modal');
+
+        if (modal.classList.contains("modal-hide")) {
+          modal.classList.remove("modal-hide");
+          modal.classList.add("modal-show");
+
+          let mc = modal.querySelector('div.modal-content');
+          if (mc.classList.contains("exit-in-style")) {
+            mc.classList.remove("exit-in-style");
+            mc.classList.add("enter-in-style");
+          }
+          else {
+            mc.classList.add("enter-in-style");
+          }
+        }
+        else {
+          modal.classList.remove("modal-show");
+          modal.classList.add("modal-hide");
+        }
+      }}>
+        <Image src={SearchSVG} alt="Search" width={20} height={20} />
+      </div>
+      <div>
+        <div className="modal modal-hide">
+          <div className="modal-content">
+            <div className="modal-header">
+              <span className="close" onClick={e => {
+                e.preventDefault();
+                let modal = e.currentTarget.parentElement.parentElement.parentElement;
+                modal.classList.remove("modal-show");
+                modal.classList.add("modal-hide");
+              }}>&times;</span>
+              <h2>Search</h2>
+            </div>
+            <div className="modal-body">
+              <input type="text" placeholder="Search for items" onChange={e => {
+                // setSearchText(e.target.value);
+                searchText = e.target.value;
+                search();
+              }} />
+            </div>
+            <div className="search-results">
+              {searchResults.map((item) => (
+                <div className="search-item" key={item.id} onClick={() => {
+                  lastSelectedItem = selectedItem;
+                  selectedItem = item;
+                }}>
+                  <div className="clm-inline">
+                    <Image src={FileSVG} alt="Warehouse" width={20} height={20} />
+                  </div>
+                  <div className="clm-inline">
+                    {item.name}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function Home() {
   const username = sessionStorage.getItem("username");
   const password = sessionStorage.getItem("password");
 
-  if (!username || !password) {
+  if (!username) {
     window.location.href = "/login";
   }
 
@@ -253,6 +340,8 @@ export default function Home() {
         <br />
         {renderComps}
       </div>
+
+      <SearchButton />
     </div>
   );
 }

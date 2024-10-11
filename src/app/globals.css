@@ -512,7 +512,7 @@ body {
   top: 0;
   width: 100%;
   height: 100%;
-  overflow: auto;
+  overflow: hidden;
   background-color: rgba(0, 0, 0, 0.4);
 }
 
@@ -531,6 +531,21 @@ body {
   font-weight: 100;
   cursor: pointer;
   float: right;
+}
+
+.modal-content h2 {
+  font-weight: 100;
+}
+
+.modal-body input {
+  width: 95%;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  border: 1px solid #606060;
+  background-color: #3a3a3a;
+  color: #f0f8ff;
 }
 
 .btn-iexpand {
@@ -558,4 +573,84 @@ body {
 
 .btn-red {
   background-color: #dc3545 !important;
+}
+
+.search-bar {
+  padding: 1rem;
+  background-color: #007bff;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+
+  position: fixed;
+  bottom: 0;
+  z-index: 1;
+  right: 10px;
+  cursor: pointer;
+}
+
+.search-results {
+  overflow-y: scroll;
+  max-height: 40vh;
+}
+
+.search-item {
+  padding: 1rem;
+  background-color: #3a3a3a;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.modal-show {
+  display: block;
+}
+
+.modal-hide {
+  display: none;
+}
+
+.enter-in-style {
+  animation: enterStyle 0.5s ease !important;
+  position: fixed;
+  top: -20%;
+}
+
+.exit-in-style {
+  animation: exitStyle 0.5s ease !important;
+  position: fixed;
+  top: -50%;
+}
+
+@keyframes enterStyle {
+  from {
+    top: -50%;
+  }
+
+  80% {
+    top: -18%;
+    rotate: -5deg;
+  }
+
+  95% {
+    rotate: 5deg;
+  }
+
+  99% {
+    rotate: 0deg;
+  }
+
+  to {
+    top: -20%;
+    rotate: 0deg;
+  }
+}
+
+@keyframes exitStyle {
+  from {
+    top: -20%;
+  }
+
+  to {
+    top: -50%;
+  }
 }
