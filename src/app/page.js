@@ -1,101 +1,258 @@
+'use client';
+
+import React, { useEffect, useReducer, useState } from "react";
+import Godowns from "./database/godowns.json";
+import Items from "./database/items.json";
+import WarehouseSVG from "./assets/warehouse.svg";
+import FolderSVG from "./assets/folder.svg";
+import FolderOpenSVG from "./assets/folder-open.svg";
+import FileSVG from "./assets/file.svg";
+import PlaceholderImage from "./assets/placeholder.jpg";
+
 import Image from "next/image";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+let GLOBAL_CONFIG = null;
+let lastSelectedItem = null;
+let selectedItem = null;
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+class Godown {
+
+  constructor(id, name) {
+    this.id = id;
+    this.name = name;
+    this.items = [];
+    this.children = [];
+    this.parent = null;
+    this.height = 1;
+  }
+
+  addItem(item) {
+    this.items.push(item);
+  }
+
+  addChild(godown) {
+    godown.parent = this;
+    godown.setHeight(this.height + 1);
+
+    this.children.push(godown);
+  }
+
+  setHeight(height) {
+    this.height = height;
+  }
+};
+
+const configGodowns = () => {
+  let gdict = {};
+
+  for (let godown of Godowns) {
+    gdict[godown.id] = new Godown(godown.id, godown.name);
+
+    if (godown.parent_godown) {
+
+      // Condition is always false
+      // if (!gdict[godown.parent_godown]) {
+
+      //   gdict[godown.parent_godown] = new Godown(godown.parent_godown, Godowns.find(g => g.id === godown.parent_godown).name);
+      // }
+
+      gdict[godown.parent_godown].addChild(gdict[godown.id]);
+    }
+  }
+
+  for (let item of Items) {
+    gdict[item.godown_id].addItem(item);
+  }
+
+  return gdict;
+};
+
+const FolderView = ({ godown }) => {
+  return (
+    <div className="folder-view">
+      <div className="folder-title">
+        <div className="clm-inline">
+          <Image src={FolderSVG} alt="Warehouse" width={20} height={20} />
+
+          <Image src={FolderOpenSVG} alt="Warehouse" width={20} height={20} className="disp-hide" />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div className="clm-inline" onClick={(e) => {
+          e.preventDefault();
+
+          e.currentTarget.parentElement.parentElement.querySelector(".folder-content").classList.toggle("folder-collapse");
+
+          e.currentTarget.parentElement.querySelector('.clm-inline').querySelectorAll('img')[0].classList.toggle("disp-hide");
+
+          e.currentTarget.parentElement.querySelector('.clm-inline').querySelectorAll('img')[1].classList.toggle("disp-hide");
+        }}>
+          {godown.name}
+        </div>
+      </div>
+      <div className="folder-content folder-collapse">
+        {godown.children.map((child) => (
+          <FolderView godown={child} key={child.id} />
+        ))}
+        <br />
+        {godown.items.map((item) => (
+          <div className="folder-item" key={item.id} onClick={() => {
+            lastSelectedItem = selectedItem;
+            selectedItem = item;
+          }}>
+            <div className="clm-inline">
+              <Image src={FileSVG} alt="Warehouse" width={20} height={20} />
+            </div>
+            <div className="clm-inline">
+              {item.name}
+            </div>
+          </div>
+        ))}
+        <br />
+      </div>
+
+      {godown.height === 1 ? <br /> : null}
+    </div>
+  );
+};
+
+const Product = (props) => {
+  let obj = props["obj"];
+  let location_arr = [];
+
+  Godowns.find((godown) => {
+    if (godown.id === obj["godown_id"]) {
+      location_arr.push(godown.name);
+      return true;
+    }
+  });
+
+  let parent_godown = GLOBAL_CONFIG[obj["godown_id"]].parent;
+
+  while (parent_godown) {
+    location_arr.push(parent_godown.name);
+    parent_godown = parent_godown.parent;
+  }
+
+  location_arr = location_arr.reverse();
+  console.log(location_arr);
+
+  return (
+    <div className="product">
+      <div className="breadcrumb">
+        <span>Home</span>
+        {location_arr.map((location, index) => (
+          <span key={index} style={{ color: "rgb(201,201,201)" }}> &gt; <span>{location}</span></span>
+        ))}
+      </div>
+      <div className="clm">
+        <Image src={obj["image_url"]} alt="Image" width={100} height={100} />
+      </div>
+      <div className="clm">
+        <h1>{obj["name"]}</h1>
+
+        <div className="badge badge-blue">
+          {obj["category"]}
+        </div>
+
+        {obj["status"] !== "in_stock" ? (
+          <div className="badge badge-red">
+            Out of stock
+          </div>
+        ) : (
+          <div className="badge badge-green">
+            In stock
+          </div>
+        )}
+
+        <br />
+        <br />
+
+        <div className="product-price">
+          <sup>$</sup>{
+            ("" + obj["price"]).split('.')[0]
+          }
+          <sup>{
+            ("" + obj["price"]).split('.')[1]
+          }
+          </sup>
+        </div>
+
+        <div className="product-quantity">
+          Quantity: {obj["quantity"]}
+        </div>
+
+      </div>
+      <div className="product-features">
+        <h2>Specifications</h2>
+        <table>
+          <tbody>
+            <tr key="brand">
+              <td>Brand</td>
+              <td>{obj["brand"]}</td>
+            </tr>
+            {Object.keys(obj["attributes"]).map((key) => (
+              <tr key={key}>
+                <td>{key.replace('_', ' ')}</td>
+                <td>{
+                  typeof (obj["attributes"][key]) == "boolean" ? (
+                    obj["attributes"][key] ? "Yes" : "No"
+                  ) : obj["attributes"][key]
+                }</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export default function Home() {
+  const username = sessionStorage.getItem("username");
+  const password = sessionStorage.getItem("password");
+
+  if (!username || !password) {
+    window.location.href = "/login";
+  }
+
+  GLOBAL_CONFIG = configGodowns();
+  let renderComps = [];
+
+  const [, forceUpdate] = useReducer(x => x + 1, 0);
+
+  for (let godown of Godowns) {
+    if (!godown.parent_godown) {
+      renderComps.push(<FolderView godown={GLOBAL_CONFIG[godown.id]} key={godown.id} />);
+    }
+  }
+
+  useEffect(() => {
+    const timeoutID = setInterval(() => {
+      if (selectedItem != lastSelectedItem) {
+        lastSelectedItem = selectedItem;
+        forceUpdate();
+      }
+
+    }, 200);
+
+    return () => clearTimeout(timeoutID);
+  }, []);
+
+  return (
+    <div id="main">
+      <div id="preview">
+        <div className={"noitem-sel " + (selectedItem !== null ? "disp-hide" : "")}>
+          <h2>No item selected</h2>
+        </div>
+
+        {selectedItem != null ? (
+          <Product obj={selectedItem} />
+        ) : null}
+      </div>
+      <div className="sidebar">
+        <h1>Welcome {username}</h1>
+        <br />
+        {renderComps}
+      </div>
     </div>
   );
 }
