@@ -91,11 +91,11 @@ const FolderView = ({ godown }) => {
       </div>
       <div className="folder-content folder-collapse">
         {godown.children.map((child) => (
-          <FolderView godown={child} />
+          <FolderView godown={child} key={child.id} />
         ))}
         <br />
         {godown.items.map((item) => (
-          <div className="folder-item" onClick={() => {
+          <div className="folder-item" key={item.id} onClick={() => {
             lastSelectedItem = selectedItem;
             selectedItem = item;
           }}>
@@ -141,7 +141,7 @@ const Product = (props) => {
       <div className="breadcrumb">
         <span>Home</span>
         {location_arr.map((location, index) => (
-          <span style={{ color: "rgb(201,201,201)" }}> &gt; <span>{location}</span></span>
+          <span key={index} style={{ color: "rgb(201,201,201)" }}> &gt; <span>{location}</span></span>
         ))}
       </div>
       <div className="clm">
@@ -186,12 +186,12 @@ const Product = (props) => {
         <h2>Specifications</h2>
         <table>
           <tbody>
-            <tr>
+            <tr key="brand">
               <td>Brand</td>
               <td>{obj["brand"]}</td>
             </tr>
             {Object.keys(obj["attributes"]).map((key) => (
-              <tr>
+              <tr key={key}>
                 <td>{key.replace('_', ' ')}</td>
                 <td>{
                   typeof (obj["attributes"][key]) == "boolean" ? (
@@ -273,7 +273,7 @@ const SearchButton = () => {
             </div>
             <div className="search-results">
               {searchResults.map((item) => (
-                <div className="search-item" onClick={() => {
+                <div className="search-item" key={item.id} onClick={() => {
                   lastSelectedItem = selectedItem;
                   selectedItem = item;
                 }}>
@@ -302,7 +302,7 @@ export default function Home() {
 
   for (let godown of Godowns) {
     if (!godown.parent_godown) {
-      renderComps.push(<FolderView godown={GLOBAL_CONFIG[godown.id]} />);
+      renderComps.push(<FolderView godown={GLOBAL_CONFIG[godown.id]} key={godown.id} />);
     }
   }
   let username = undefined;
